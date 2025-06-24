@@ -5,20 +5,20 @@ using System.Net.Sockets;
 
 namespace GrabadoBarralesWorkerService
 {
-    public class Worker(ILogger<Worker> logger) : BackgroundService
+    public class Worker(ILogger<Worker> logger, Tcp tcp) : BackgroundService
     {
         private readonly ILogger<Worker> _logger = logger;
-        private TcpListener? _server; // Make server a field so we can access it later
-        private readonly Tcp _tcp = new(new MySqlContext(), new ESCORIALContext()); // Create a new instance of Tcp
+        private TcpListener? _server;
+        private readonly Tcp _tcp = tcp;
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             try
             {
                 const int port = 5000;
-                _server = new TcpListener(IPAddress.Any, port); // Assign to the field
+                _server = new TcpListener(IPAddress.Any, port); 
                 _server.Start();
-                _logger.LogInformation("TCP server listening on port {Port}", port); // Use logger
+                _logger.LogInformation("TCP server listening on port {Port}", port);
 
                 while (!stoppingToken.IsCancellationRequested)
                 {

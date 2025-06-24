@@ -24,4 +24,6 @@ public partial class registros
 
     [Key]
     public int id { get; set; }
+
+    public int? grabadora { get; set; }
 }
