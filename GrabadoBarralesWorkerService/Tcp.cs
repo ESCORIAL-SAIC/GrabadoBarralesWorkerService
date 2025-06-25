@@ -6,12 +6,14 @@ using System.Text;
 
 namespace GrabadoBarralesWorkerService
 {
-    internal class Tcp(MySqlContext mySql, ESCORIALContext pgSql)
+    public class Tcp(IDbContextFactory<MySqlContext> mySqlFactory, IDbContextFactory<ESCORIALContext> pgSqlFactory)
     {
         public async Task HandleClientAsync(TcpClient client)
         {
             try
             {
+                await using var mySql = await mySqlFactory.CreateDbContextAsync();
+                await using var pgSql = await pgSqlFactory.CreateDbContextAsync();
                 await using var stream = client.GetStream();
                 while (client.Connected)
                 {
@@ -30,7 +32,7 @@ namespace GrabadoBarralesWorkerService
                         var lastReg = await mySql
                             .registros
                             .OrderByDescending(x => x.fecha)
-                            .FirstOrDefaultAsync();
+                            .FirstOrDefaultAsync(x => x.grabadora.ToString() == receivedMessage);
 
                         if (lastReg == null)
                         {
