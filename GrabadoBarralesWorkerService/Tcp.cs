@@ -28,6 +28,7 @@ namespace GrabadoBarralesWorkerService
                         Console.WriteLine($"Mensaje recibido: {receivedMessage}");
                         //---------------------------------------------------------
 
+
                         var lastReg = await mySql
                             .registros
                             .OrderByDescending(x => x.fecha)
