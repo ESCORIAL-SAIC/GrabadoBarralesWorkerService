@@ -22,26 +22,6 @@ public partial class MySqlContext : DbContext
 
     public virtual DbSet<registros> registros { get; set; }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        IConfiguration configuration = new ConfigurationBuilder()
-            .SetBasePath(Directory.GetCurrentDirectory()) // Ruta al directorio del proyecto
-            .AddJsonFile("appsettings.json") // Nombre del archivo de configuración
-            .Build();
-
-        var connectionString = configuration.GetConnectionString("MySql"); // Nombre de la cadena de conexión en appsettings.json
-
-        if (!string.IsNullOrEmpty(connectionString))
-        {
-            optionsBuilder.UseMySql(connectionString, ServerVersion.Parse("8.0.40-mysql"));
-        }
-        else
-        {
-            // Manejo de error si la cadena de conexión no se encuentra en appsettings.json
-            throw new Exception("No se encontró la cadena de conexión 'MySql' en appsettings.json");
-        }
-    }
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder

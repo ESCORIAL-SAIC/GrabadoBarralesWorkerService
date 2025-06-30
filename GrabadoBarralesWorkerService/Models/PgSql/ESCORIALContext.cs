@@ -18,26 +18,7 @@ public partial class ESCORIALContext : DbContext
     }
 
     public virtual DbSet<etiquetas_maestro_barrales> etiquetas_maestro_barrales { get; set; }
-
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        IConfiguration configuration = new ConfigurationBuilder()
-            .SetBasePath(Directory.GetCurrentDirectory()) // Ruta al directorio del proyecto
-            .AddJsonFile("appsettings.json") // Nombre del archivo de configuración
-            .Build();
-
-        var connectionString = configuration.GetConnectionString("ESCORIAL"); // Nombre de la cadena de conexión en appsettings.json
-
-        if (!string.IsNullOrEmpty(connectionString))
-        {
-            optionsBuilder.UseNpgsql(connectionString);
-        }
-        else
-        {
-            // Manejo de error si la cadena de conexión no se encuentra en appsettings.json
-            throw new Exception("No se encontró la cadena de conexión 'ESCORIAL' en appsettings.json");
-        }
-    }
+    
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder
