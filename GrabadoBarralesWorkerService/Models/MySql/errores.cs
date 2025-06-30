@@ -21,4 +21,5 @@ public partial class errores
 
     [Column(TypeName = "datetime")]
     public DateTime? fecha { get; set; }
+    public int? puesto { get; set; }
 }

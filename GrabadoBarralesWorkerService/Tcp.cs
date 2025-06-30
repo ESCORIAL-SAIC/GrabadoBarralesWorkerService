@@ -32,7 +32,7 @@ namespace GrabadoBarralesWorkerService
                         var lastReg = await mySql
                             .registros
                             .OrderByDescending(x => x.fecha)
-                            .FirstOrDefaultAsync(x => x.grabadora.ToString() == receivedMessage);
+                            .FirstOrDefaultAsync(x => x.puesto.ToString() == receivedMessage);
 
                         if (lastReg == null)
                         {

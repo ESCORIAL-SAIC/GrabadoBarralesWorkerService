@@ -28,4 +28,5 @@ public partial class etiquetas_maestro_barrales
     [Required]
     [StringLength(50)]
     public string operador { get; set; }
+    public int? puesto { get; set; }
 }
