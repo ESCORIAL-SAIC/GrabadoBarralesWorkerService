@@ -25,38 +25,58 @@ namespace GrabadoBarralesWorkerService
                             break;
 
                         var receivedMessage = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+                        var puesto = int.Parse(receivedMessage);
                         Console.WriteLine($"Mensaje recibido: {receivedMessage}");
                         //---------------------------------------------------------
 
-
-                        var lastReg = await mySql
-                            .registros
-                            .OrderByDescending(x => x.fecha)
-                            .FirstOrDefaultAsync(x => x.grabadora.ToString() == receivedMessage);
-
-                        if (lastReg == null)
+                        try
                         {
-                            Console.WriteLine("No se encontraron registros en la base de datos.");
+                            var lastReg = await mySql
+                                .registros
+                                .OrderByDescending(x => x.fecha)
+                                .FirstOrDefaultAsync(x => x.puesto.ToString() == receivedMessage); 
+
+                            if (lastReg == null)
+                            {
+                                Console.WriteLine("No se encontraron registros en la base de datos.");
+                                continue;
+                            }
+
+                            var serial = $"B{lastReg.id:D8}";
+                            var newReg = new etiquetas_maestro_barrales()
+                            {
+                                fecha_alta = (DateTime)lastReg.fecha!,
+                                operador = lastReg.operador,
+                                serie = serial,
+                                tipo_barral_codigo = lastReg.tipo_barral.ToString(),
+                                puesto = lastReg.puesto
+                            };
+
+                            pgSql.etiquetas_maestro_barrales.Add(newReg);
+                            await pgSql.SaveChangesAsync();
+
+
+                            //---------------------------------------------------------
+                            var responseMessage = serial;
+                            var responseBytes = Encoding.UTF8.GetBytes(responseMessage);
+                            await stream.WriteAsync(responseBytes);
+                            Console.WriteLine("Respuesta enviada al cliente.");
+                        }
+                        catch (Exception ex)
+                        {
+                            var error = new errores()
+                            {
+                                fecha = DateTime.Now,
+                                message = ex.Message,
+                                inner_exception = ex.InnerException?.Message,
+                                puesto = puesto
+                            };
+                            mySql.errores.Add(error);
+                            await mySql.SaveChangesAsync();
+                            Console.WriteLine($"Error en procesamiento de mensaje: {ex.Message}");
+
                             continue;
                         }
-
-                        var serial = $"B{lastReg.id:D8}";
-                        var newReg = new etiquetas_maestro_barrales()
-                        {
-                            fecha_alta = (DateTime)lastReg.fecha!,
-                            operador = lastReg.operador,
-                            serie = serial,
-                            tipo_barral_codigo = lastReg.tipo_barral.ToString()
-                        };
-                        pgSql.etiquetas_maestro_barrales.Add(newReg);
-                        await pgSql.SaveChangesAsync();
-
-
-                        //---------------------------------------------------------
-                        var responseMessage = serial;
-                        var responseBytes = Encoding.UTF8.GetBytes(responseMessage);
-                        await stream.WriteAsync(responseBytes);
-                        Console.WriteLine("Respuesta enviada al cliente.");
                     }
                     catch (Exception ex)
                     {
@@ -64,11 +84,12 @@ namespace GrabadoBarralesWorkerService
                         {
                             fecha = DateTime.Now,
                             message = ex.Message,
-                            inner_exception = ex.InnerException?.Message
+                            inner_exception = ex.InnerException?.Message,
+                            puesto = 0
                         };
                         mySql.errores.Add(error);
                         await mySql.SaveChangesAsync();
-                        Console.WriteLine($"Error en procesamiento de mensaje: {ex.Message}\nInner exception: {ex.InnerException}");
+                        Console.WriteLine($"Error en procesamiento de mensaje: {ex.Message}");
 
                         continue;
                     }
