@@ -483,8 +483,5 @@ $RECYCLE.BIN/
 # Vim temporary swap files
 *.swp
 
-GrabadoBarralesWorkerService/appsettings.json
-appsettings.json
-
 GrabadoBarralesWorkerService/appsettings.Development.json
 appsettings.Development.json
